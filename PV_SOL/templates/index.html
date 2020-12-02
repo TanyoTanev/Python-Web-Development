@@ -1,0 +1,15 @@
+{% extends "common/base/base.html" %}
+{%block site_heading %} Registered PV Plants {% endblock %}
+{% block site_content %}
+    <form method="get" action="{% url 'index' %}">
+            {{ filter_form }}
+            {% csrf_token %}
+            <button>Filter</button>
+    </form>
+    <div class="d-flex p-3">
+        {% for pv_plant in pv_plants %}
+            {% include "partials/pv_details.html" with pv_plant=pv_plant %}
+        {% endfor %}
+    </div>
+
+{% endblock %}
