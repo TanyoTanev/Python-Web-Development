@@ -1,13 +1,17 @@
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView, CreateView, TemplateView, FormView
 
-from .forms import PVCreateForm, RegisterForm, LoginForm, FilterForm, ProfileForm
+from .decorators import group_required
+from .forms import PVCreateForm, RegisterForm, LoginForm, FilterForm, ProfileForm, ForecastForm
 from .models import PV_Plant
+from .view_mixins import GroupRequiredMixin
 
 
 def extract_filter_values(params):
@@ -36,47 +40,98 @@ class IndexView(ListView):
     template_name = 'index.html'
     model = PV_Plant
     context_object_name = 'pv_plants'
-    order_by='name'
+    order_by_asc = True
+    order_by = 'name'
+    contains_text = ''
 
     def dispatch(self, request, *args, **kwargs):
         params = extract_filter_values(request.GET)
-        self.order_by_asc = params['order'] == FilterForm.ORDER_ASC
+        #self.order_by_asc = params['order'] == FilterForm.ORDER_ASC
+        self.order_by = params['order']
+        self.contains_text = params['text']
         return super().dispatch(request, *args,**kwargs)
 
+    def get_queryset(self):
+        order_by = 'name' if self.order_by == FilterForm.ORDER_ASC else '-name'
+        result = self.model.objects.filter(name__icontains=self.contains_text).order_by(order_by)
+        return result
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['pv_plants'] = sorted(context['pv_plants'], key=lambda x:x.name, reverse=not self.order_by_asc)
-        context['filter_form'] = FilterForm(initial={'order': self.order_by_asc})
+        #context['pv_plants'] = sorted(context['pv_plants'], key=lambda x:x.name, reverse=not self.order_by_asc)
+        context['filter_form'] = FilterForm(initial={'order': self.order_by,
+                                                     'text':self.contains_text
+                                                            })
         return context
 
 
 
-def create(request):
-    if request.method == 'GET':
-        form = PVCreateForm()
-        context = {'form': form,
-                   'current_page':'create',
-                   }
-        return render(request, 'create.html', context )
-    else:
-        form = PVCreateForm(request.POST, request.FILES)
-        print(form)
-        if form.is_valid():
-            pv_plant = form.save()
-            pv_plant.save()
-            return redirect('index')
+#def create(request):
+#    if request.method == 'GET':
+#        form = PVCreateForm()
+#        context = {'form': form,
+#                   'current_page':'create',
+#                   }
+#        return render(request, 'create.html', context )
+#    else:
+#        form = PVCreateForm(request.POST, request.FILES)
+#        print(form)
+#        if form.is_valid():
+#            pv_plant = form.save()
+#            pv_plant.save()
+#            return redirect('index')
 
+@method_decorator(group_required(groups=['Owners group']), name='dispatch')
+class PVCreateView(LoginRequiredMixin, FormView): #GroupRequiredMixin,
+    form_class = PVCreateForm
+    template_name = 'create.html'
+    success_url = reverse_lazy('index')
+    groups = 'User'
 
-@transaction.atomic
-def register_user(request):
-    if request.method == 'GET':
-        context = {
-                    'user_form': RegisterForm(),
-                    'profile_form': ProfileForm(),
-        }
-        return render(request, 'register.html', context )
-    else:
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+#@transaction.atomic
+#def register_user(request):
+#    if request.method == 'GET':
+#        context = {
+#                    'user_form': RegisterForm(),
+#                    'profile_form': ProfileForm(),
+#        }
+#        return render(request, 'register.html', context )
+#    else:
+#        user_form = RegisterForm(request.POST)
+#        profile_form = ProfileForm(request.POST, request.FILES)
+#
+#        if user_form.is_valid() and profile_form.is_valid():
+#            user = user_form.save()
+#            profile = profile_form.save(commit=False)
+#            profile.user = user
+#            profile.save()
+#
+#            login(request, user)
+#            return redirect('index')
+#
+#        context = {
+#            'user_form': RegisterForm(),
+#            'profile_form': ProfileForm(),
+#        }
+#    return render(request, 'register.html', context)
+
+class RegisterView(TemplateView):
+    template_name = 'register.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['user_form'] = RegisterForm()
+        context['profile_form'] = ProfileForm()
+
+        return context
+
+    def post(self, request):
+
         user_form = RegisterForm(request.POST)
         profile_form = ProfileForm(request.POST, request.FILES)
 
@@ -93,21 +148,27 @@ def register_user(request):
             'user_form': RegisterForm(),
             'profile_form': ProfileForm(),
         }
-    return render(request, 'register.html', context)
+        return render(request, 'register.html', context)
 
-#class RegisterView(CreateView):
-#    form_class = UserCreationForm
-#    template_name = 'register.html'
-#    success_url = reverse_lazy('index.html')
 
-#    def get_context_data(self, **kwargs):
-#        context = super().get_context_data(**kwargs)
+def forecast_generation(request):
+    if request.method == 'GET':
+        context = {
+            'forecast_form': ForecastForm(),
+        }
+        return render(request, 'forecast.html', context)
+    else:
+        forecast_form = ForecastForm(request.POST)
+        context = {
+            'forecast_form': ForecastForm(),
+        }
+    return render(request, 'forecast.html', context)
 
-#        context['user_forms'] = context['forms'],
-#        context['profile_forms'] = ProfileForm()
-#
-#        return context
-
+@method_decorator(group_required(groups=['Owners group']), name='dispatch')
+class GenerationForecast(ListView):
+    template_name = 'forecast.html'
+    model = PV_Plant
+    context_object_name = 'pv_plants'
 
 
 def login_user(request):

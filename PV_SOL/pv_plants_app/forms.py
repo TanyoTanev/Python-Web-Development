@@ -60,3 +60,9 @@ class FilterForm(forms.Form):
         choices=ORDER_CHOISES,
         required=False,
     )
+
+
+class ForecastForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile # maybe I will choose another later
+        fields = '__all__'
