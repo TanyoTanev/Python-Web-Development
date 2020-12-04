@@ -4,7 +4,7 @@
     <form method="get" action="{% url 'index' %}">
             {{ filter_form }}
             {% csrf_token %}
-            <button>Filter</button>
+            <button class="btn btn-primary">Filter</button>
     </form>
     <div class="d-flex p-3">
         {% for pv_plant in pv_plants %}

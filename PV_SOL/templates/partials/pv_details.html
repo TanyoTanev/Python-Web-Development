@@ -4,5 +4,11 @@
         <h5 class="card-title">{{ pv_plant.name }}</h5>
         <h5 class="card-title">{{ pv_plant.power }}</h5>
         <p class="card-text">{{ pv_plant.description }}</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'pv_plant_details' pv_plant.id %}"><button class="btn btn-primary">See more</button></a>
+        {% endif %}
+        {% if user.id == pv_plant.owner_id %}
+            <a href="{% url 'pv_plant_details' pv_plant.id %}"><button class="btn btn-primary">Edit</button></a>
+        {% endif %}
     </div>
 </div>

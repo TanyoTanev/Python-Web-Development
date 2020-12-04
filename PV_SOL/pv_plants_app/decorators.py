@@ -19,6 +19,8 @@ def group_required(groups=None):
                 return view_func(request, *args, **kwargs)
             else:
                 return HttpResponse('You are not authorized plant owner or engineer')
-        return  wrapper
+        return wrapper
 
     return decorator
+
+

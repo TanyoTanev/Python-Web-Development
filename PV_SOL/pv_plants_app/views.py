@@ -6,7 +6,7 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, TemplateView, FormView
+from django.views.generic import ListView, CreateView, TemplateView, FormView, UpdateView
 
 from .decorators import group_required
 from .forms import PVCreateForm, RegisterForm, LoginForm, FilterForm, ProfileForm, ForecastForm
@@ -44,11 +44,14 @@ class IndexView(ListView):
     order_by = 'name'
     contains_text = ''
 
+
     def dispatch(self, request, *args, **kwargs):
         params = extract_filter_values(request.GET)
         #self.order_by_asc = params['order'] == FilterForm.ORDER_ASC
         self.order_by = params['order']
         self.contains_text = params['text']
+
+
         return super().dispatch(request, *args,**kwargs)
 
     def get_queryset(self):
@@ -66,30 +69,39 @@ class IndexView(ListView):
 
 
 
-#def create(request):
-#    if request.method == 'GET':
-#        form = PVCreateForm()
-#        context = {'form': form,
-#                   'current_page':'create',
-#                   }
-#        return render(request, 'create.html', context )
-#    else:
-#        form = PVCreateForm(request.POST, request.FILES)
-#        print(form)
-#        if form.is_valid():
-#            pv_plant = form.save()
-#            pv_plant.save()
-#            return redirect('index')
+def create(request):
+    if request.method == 'GET':
+        form = PVCreateForm()
+        context = {'form': form,
+                   'current_page': 'create',
+                   }
+        return render(request, 'create.html', context)
+    else:
+        form = PVCreateForm(request.POST, request.FILES)
+        print(form)
+        if form.is_valid():
+            #contact = form.save()
+            #contact.owner = request.user
+            #contact.save()
+
+            pv_plant = form.save(commit=False)
+            pv_plant.owner = request.user
+            pv_plant.save()
+            return redirect('index')
 
 @method_decorator(group_required(groups=['Owners group']), name='dispatch')
-class PVCreateView(LoginRequiredMixin, FormView): #GroupRequiredMixin,
+class PVCreateView(GroupRequiredMixin,LoginRequiredMixin, FormView): #
     form_class = PVCreateForm
     template_name = 'create.html'
     success_url = reverse_lazy('index')
-    groups = 'User'
+    groups = ['User']
 
     def form_valid(self, form):
-        form.save()
+        #contact = form.save(commit=False)
+        #contact.owner = request.user
+        #contact.save()
+
+        form.save() # оригинално така да се каже
         return super().form_valid(form)
 
 #@transaction.atomic
@@ -150,19 +162,40 @@ class RegisterView(TemplateView):
         }
         return render(request, 'register.html', context)
 
+@login_required(login_url='login user')
+def pv_plant_details(request, pk):
+    pv_plant = PV_Plant.objects.get(pk=pk)
+    context = {
+        'pv_plant': pv_plant,
+            }
+    return render(request, 'pv_plants_details.html',context)
 
-def forecast_generation(request):
-    if request.method == 'GET':
-        context = {
-            'forecast_form': ForecastForm(),
-        }
-        return render(request, 'forecast.html', context)
-    else:
-        forecast_form = ForecastForm(request.POST)
-        context = {
-            'forecast_form': ForecastForm(),
-        }
-    return render(request, 'forecast.html', context)
+
+class PVPlantUpdate(ListView):
+    fields = ['name']
+    template_name = 'edit.html'
+    model = PV_Plant
+
+#    def get_context_data(self, *, object_list=None, **kwargs):
+#        context = super().get_context_data()
+#        context['object_list'] = PV_Plant.objects.filter(name__icontains="Tanev")#created_by_id=1)
+#        return context
+
+    def get_queryset(self):
+        return self.model.objects.filter(user=self.request.user.id)
+
+#def forecast_generation(request):
+#    if request.method == 'GET':
+#        context = {
+#            'forecast_form': ForecastForm(),
+#        }
+#        return render(request, 'forecast.html', context)
+#    else:
+#        forecast_form = ForecastForm(request.POST)
+#        context = {
+#            'forecast_form': ForecastForm(),
+#        }
+#    return render(request, 'forecast.html', context)
 
 @method_decorator(group_required(groups=['Owners group']), name='dispatch')
 class GenerationForecast(ListView):
