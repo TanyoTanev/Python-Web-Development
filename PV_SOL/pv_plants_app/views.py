@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, TemplateView, FormView, UpdateView
 
 from .decorators import group_required
-from .forms import PVCreateForm, RegisterForm, LoginForm, FilterForm, ProfileForm, ForecastForm
+from .forms import PVCreateForm, RegisterForm, LoginForm, FilterForm, ProfileForm, ForecastForm, PVUpdateForm
 from .models import PV_Plant
 from .view_mixins import GroupRequiredMixin
 
@@ -80,9 +80,6 @@ def create(request):
         form = PVCreateForm(request.POST, request.FILES)
         print(form)
         if form.is_valid():
-            #contact = form.save()
-            #contact.owner = request.user
-            #contact.save()
 
             pv_plant = form.save(commit=False)
             pv_plant.owner = request.user
@@ -170,6 +167,44 @@ def pv_plant_details(request, pk):
             }
     return render(request, 'pv_plants_details.html',context)
 
+#@method_decorator(group_required(groups=['Owners group']), name='dispatch')
+class PVUpdateView(GroupRequiredMixin,LoginRequiredMixin, FormView): #
+    form_class = PVUpdateForm
+    template_name = 'pv_update.html'
+    success_url = reverse_lazy('index')
+    groups = ['User']
+
+    def form_valid(self, form):
+        #contact = form.save(commit=False)
+        #contact.owner = request.user
+        #contact.save()
+
+        form.save() # оригинално така да се каже
+        return super().form_valid(form)
+
+
+
+
+def pv_plant_edit(request, pk):
+    pv_plant = PV_Plant.objects.get(pk=pk)
+    form = PVCreateForm(request.POST or None, instance=pv_plant)
+    if form.is_valid():
+        pv_plant.owner = request.user
+        form.save()
+        return redirect('index')
+    return render(request, 'pv_update.html', context={'form':form})
+
+def pv_plant_delete(request, pk):
+    pv_plant = PV_Plant.objects.get(pk=pk)
+    if request.method == 'GET':
+        context = {
+            'pv_plant': pv_plant,
+                   }
+        return render(request, 'delete.html', context)
+    else:
+        pv_plant.delete()
+        return redirect('index')
+
 
 class PVPlantUpdate(ListView):
     fields = ['name']
@@ -228,3 +263,4 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     return redirect('index')
+

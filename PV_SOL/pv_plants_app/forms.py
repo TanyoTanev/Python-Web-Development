@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.views.generic import UpdateView
 
 from .models import PV_Plant, UserProfile
 from django import forms
@@ -16,6 +17,19 @@ class PVCreateForm(forms.ModelForm):
             'image': forms.FileInput(attrs={'class': 'custom-file-input'}),
         }
         fields = '__all__'
+
+class PVUpdateForm(forms.ModelForm):
+    class Meta:
+        model = PV_Plant
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}),
+            'power': forms.TextInput(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'custom-file-input'}),
+        }
+        fields = '__all__'
+
+
 
 
 

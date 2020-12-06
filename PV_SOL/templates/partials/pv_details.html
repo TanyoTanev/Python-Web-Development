@@ -7,8 +7,12 @@
         {% if user.is_authenticated %}
             <a href="{% url 'pv_plant_details' pv_plant.id %}"><button class="btn btn-primary">See more</button></a>
         {% endif %}
-        {% if user.id == pv_plant.owner_id %}
-            <a href="{% url 'pv_plant_details' pv_plant.id %}"><button class="btn btn-primary">Edit</button></a>
+        {% if user.id == pv_plant.owner_id or user.id == 1%}
+            <a href="{% url 'edit' pv_plant.id %}"><button class="btn btn-primary">Edit</button></a>
+        {% endif %}
+        {% if user.id == pv_plant.owner_id or user.id == 1%}
+            <a href="{% url 'delete' pv_plant.id %}"><button class="btn btn-danger">Delete</button></a>
         {% endif %}
     </div>
 </div>
+
