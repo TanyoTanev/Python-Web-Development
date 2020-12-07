@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from .views import login_user, logout_user, PVCreateView, GenerationForecast, \
     PVPlantUpdate, PVUpdateView  # register_user, forecast_generation,
+from predictor.views import forecast_result
 
 urlpatterns = [
     #path('', views.index, name="index"),
@@ -11,7 +12,7 @@ urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     #path('register/', register_user, name='register'),
     #path('forecast/', forecast_generation, name='forecast'), # just for now using register user for test only
-    path('forecast/', GenerationForecast.as_view(), name='forecast'),
+    path('forecast/', forecast_result, name='forecast'),
     path('pv_plant_details/<int:pk>', views.pv_plant_details, name='pv_plant_details'),
     path('pv_plant_edit/<int:pk>', views.pv_plant_edit, name='edit'),
     path('pv_plant_delete/<int:pk>', views.pv_plant_delete, name='delete'),

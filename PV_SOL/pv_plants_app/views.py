@@ -208,7 +208,7 @@ def pv_plant_delete(request, pk):
 
 class PVPlantUpdate(ListView):
     fields = ['name']
-    template_name = 'edit.html'
+    template_name = 'pv_update.html'
     model = PV_Plant
 
 #    def get_context_data(self, *, object_list=None, **kwargs):

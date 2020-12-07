@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'pv_plants_app',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrap4',
     'rest_framework',
+    #additional apps
+    'pv_plants_app',
+    'predictor',
+
 ]
 
 MIDDLEWARE = [
@@ -129,3 +133,5 @@ STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = join(BASE_DIR,'media')
+
+MODELS = os.path.join(BASE_DIR, 'predictor/model')
