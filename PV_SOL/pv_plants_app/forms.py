@@ -30,9 +30,6 @@ class PVUpdateForm(forms.ModelForm):
         fields = '__all__'
 
 
-
-
-
 class LoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(
@@ -76,7 +73,5 @@ class FilterForm(forms.Form):
     )
 
 
-class ForecastForm(forms.ModelForm):
-    class Meta:
-        model = UserProfile # maybe I will choose another later
-        fields = '__all__'
+class ForecastForm(forms.Form):
+    number_of_days = forms.IntegerField(label='number_of_days')

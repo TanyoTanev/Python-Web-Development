@@ -1,0 +1,13 @@
+{% extends "common/base/base.html" %}
+{% block site_content %}
+
+    {% load bootstrap4 %}
+    <h1 class="text-center"> Forecast </h1>
+
+    <form method="post" action="{% url 'forecast_graph' %}">
+        {% csrf_token %}
+        {{ graph|safe }}
+    </form>
+    </div>
+
+{% endblock %}

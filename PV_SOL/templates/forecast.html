@@ -3,5 +3,14 @@
 
     {% load bootstrap4 %}
     <h1 class="text-center"> Forecast </h1>
-    Your forecast is {{result}}
+
+
+    <div class="d-flex p-3">
+    <form method="post" action="{% url 'forecast_graph' %}" class="col-lg-6 offset-lg-3" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="number_of_days"> Number of days: </label>
+        <input id="number_of_days" type="number" name="number_of_days">
+        <input type="submit" value="Predict" class="btn btn-primary mt-3">
+    </form>
+    </div>
 {% endblock %}

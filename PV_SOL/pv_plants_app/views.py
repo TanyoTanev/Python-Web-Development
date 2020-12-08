@@ -68,7 +68,7 @@ class IndexView(ListView):
         return context
 
 
-
+@login_required(login_url='login user')
 def create(request):
     if request.method == 'GET':
         form = PVCreateForm()
@@ -128,6 +128,8 @@ class PVCreateView(GroupRequiredMixin,LoginRequiredMixin, FormView): #
 #        }
 #    return render(request, 'register.html', context)
 
+
+
 class RegisterView(TemplateView):
     template_name = 'register.html'
 
@@ -182,9 +184,7 @@ class PVUpdateView(GroupRequiredMixin,LoginRequiredMixin, FormView): #
         form.save() # оригинално така да се каже
         return super().form_valid(form)
 
-
-
-
+# allowed only if the user id is creator or admin, checked in template
 def pv_plant_edit(request, pk):
     pv_plant = PV_Plant.objects.get(pk=pk)
     form = PVCreateForm(request.POST or None, instance=pv_plant)
@@ -194,6 +194,7 @@ def pv_plant_edit(request, pk):
         return redirect('index')
     return render(request, 'pv_update.html', context={'form':form})
 
+# allowed only if the user id is creator or admin, checked in template
 def pv_plant_delete(request, pk):
     pv_plant = PV_Plant.objects.get(pk=pk)
     if request.method == 'GET':
@@ -211,26 +212,6 @@ class PVPlantUpdate(ListView):
     template_name = 'pv_update.html'
     model = PV_Plant
 
-#    def get_context_data(self, *, object_list=None, **kwargs):
-#        context = super().get_context_data()
-#        context['object_list'] = PV_Plant.objects.filter(name__icontains="Tanev")#created_by_id=1)
-#        return context
-
-    def get_queryset(self):
-        return self.model.objects.filter(user=self.request.user.id)
-
-#def forecast_generation(request):
-#    if request.method == 'GET':
-#        context = {
-#            'forecast_form': ForecastForm(),
-#        }
-#        return render(request, 'forecast.html', context)
-#    else:
-#        forecast_form = ForecastForm(request.POST)
-#        context = {
-#            'forecast_form': ForecastForm(),
-#        }
-#    return render(request, 'forecast.html', context)
 
 @method_decorator(group_required(groups=['Owners group']), name='dispatch')
 class GenerationForecast(ListView):
