@@ -1,6 +1,10 @@
 {% extends "common/base/base.html" %}
+{% load static %}
+
 {%block site_heading %} Registered PV Plants {% endblock %}
 {% block site_content %}
+
+
     <form method="get" action="{% url 'index' %}">
             {{ filter_form }}
             {% csrf_token %}

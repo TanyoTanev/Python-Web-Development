@@ -22,7 +22,6 @@ urlpatterns = [
     path('rest-apies',include('rest_framework.urls')),
     path('admin/', admin.site.urls),
     path('', include('pv_plants_app.urls'))
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 #

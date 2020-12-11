@@ -24,19 +24,6 @@ def extract_filter_values(params):
         'text': text,
     }
 
-# Create your views here.
-#def index(request):
-#    params = extract_filter_values(request.GET)
-#    order_by = 'name' if params['order'] == FilterForm.ORDER_ASC else '-name'
-#    pv_plants = PV_Plant.objects.filter(name__icontains=params['text']).order_by(order_by)
-
-#    context = {'pv_plants': pv_plants,
-#              'current_page': 'home',
-#              'filter_form':FilterForm(),
-#               }
-#    return render(request, 'index.html', context)
-
-#@login_required(login_url='login user')
 class IndexView(ListView):
     template_name = 'index.html'
     model = PV_Plant
@@ -52,7 +39,6 @@ class IndexView(ListView):
         self.order_by = params['order']
         self.contains_text = params['text']
 
-
         return super().dispatch(request, *args,**kwargs)
 
     def get_queryset(self):
@@ -64,71 +50,27 @@ class IndexView(ListView):
         context = super().get_context_data(**kwargs)
         #context['pv_plants'] = sorted(context['pv_plants'], key=lambda x:x.name, reverse=not self.order_by_asc)
         context['filter_form'] = FilterForm(initial={'order': self.order_by,
-                                                     'text':self.contains_text
+                                                     'text': self.contains_text
                                                             })
         return context
 
 
-@login_required(login_url='login user')
-def create(request):
-    if request.method == 'GET':
-        form = PVCreateForm()
-        context = {'form': form,
-                   'current_page': 'create',
-                   }
-        return render(request, 'create.html', context)
-    else:
-        form = PVCreateForm(request.POST, request.FILES)
-        print(form)
-        if form.is_valid():
-
-            pv_plant = form.save(commit=False)
-            pv_plant.owner = request.user
-            pv_plant.save()
-            return redirect('index')
-
 @method_decorator(group_required(groups=['Owners group']), name='dispatch')
-class PVCreateView(GroupRequiredMixin,LoginRequiredMixin, FormView): #
+class PVCreateView(GroupRequiredMixin, LoginRequiredMixin, CreateView):
     form_class = PVCreateForm
     template_name = 'create.html'
-    success_url = reverse_lazy('index')
     groups = ['User']
 
+    def get_success_url(self):
+        success_url = reverse_lazy('index', kwargs={})
+        return success_url
+
     def form_valid(self, form):
-        #contact = form.save(commit=False)
-        #contact.owner = request.user
-        #contact.save()
+        pv_plant = form.save(commit=False)
+        pv_plant.owner = self.request.user
+        pv_plant.save()
 
-        form.save() # оригинално така да се каже
         return super().form_valid(form)
-
-#@transaction.atomic
-#def register_user(request):
-#    if request.method == 'GET':
-#        context = {
-#                    'user_form': RegisterForm(),
-#                    'profile_form': ProfileForm(),
-#        }
-#        return render(request, 'register.html', context )
-#    else:
-#        user_form = RegisterForm(request.POST)
-#        profile_form = ProfileForm(request.POST, request.FILES)
-#
-#        if user_form.is_valid() and profile_form.is_valid():
-#            user = user_form.save()
-#            profile = profile_form.save(commit=False)
-#            profile.user = user
-#            profile.save()
-#
-#            login(request, user)
-#            return redirect('index')
-#
-#        context = {
-#            'user_form': RegisterForm(),
-#            'profile_form': ProfileForm(),
-#        }
-#    return render(request, 'register.html', context)
-
 
 
 class RegisterView(TemplateView):
@@ -161,6 +103,7 @@ class RegisterView(TemplateView):
             'profile_form': ProfileForm(),
         }
         return render(request, 'register.html', context)
+
 
 @login_required(login_url='login user')
 def pv_plant_details(request, pk):
@@ -292,11 +235,6 @@ class LoginView(CreateView):
     form_class = LoginForm
     success_url = reverse_lazy('index')
 
-    #def form_valid(self, form):
-    #    valid = super().form_valid(form)
-    #    user = form.save()
-    #    login(self.request, user)
-    #    return valid
     def post(self, request, *args, **kwargs):
 
         login_form = LoginForm(request.POST)
@@ -315,32 +253,9 @@ class LoginView(CreateView):
                 }
         return render(request, 'login.html', context)
 
-def login_user(request):
-    if request.method == 'GET':
-       context = { 'login_form': LoginForm(),
-                 }
-       return render(request, 'login.html', context)
-    else:
-        login_form = LoginForm(request.POST)
-        if login_form.is_valid():
-            username = login_form.cleaned_data['username']
-            password = login_form.cleaned_data['password']
-            user = authenticate(username=username, password=password)
-            if user:
-                login(request, user)
-                return redirect('index')
-
-            return redirect('index')
-
-        context = {
-            'login_form':login_form,
-        }
 
 class Logout(LogoutView):
     next_page = reverse_lazy('index')
 
 
-def logout_user(request):
-    logout(request)
-    return redirect('index')
 
