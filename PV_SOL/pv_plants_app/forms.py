@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.views.generic import UpdateView
 
 from .models import PV_Plant, UserProfile
@@ -74,4 +75,7 @@ class FilterForm(forms.Form):
 
 
 class ForecastForm(forms.Form):
-    number_of_days = forms.IntegerField(label='number_of_days')
+
+    number_of_days = forms.IntegerField(min_value=1, max_value=17, validators=[MinValueValidator(1), MaxValueValidator(17)])
+
+

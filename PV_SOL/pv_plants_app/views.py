@@ -2,6 +2,7 @@ from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LogoutView
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -220,6 +221,100 @@ class GenerationForecast(ListView):
     context_object_name = 'pv_plants'
 
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #context['user_id'] = PV_Plant.objects(self.request.user)
+        #object_list = self.object_list
+        #queryset = kwargs.pop('object_list', None)
+        #if queryset is None:
+        #    self.object_list = self.PV_Plant.objects.all()
+        #object_list = self.object_list
+        context['form'] = ForecastForm()
+        #context['pv_plants'] = object_list
+        return context
+
+
+   # def get(self, request, *args, **kwargs):
+        #context = super().get_context_data(**kwargs)
+       # id=self.request.get('id')
+        #context['id']=id
+        #return context
+
+def pv_plant_forecast(request, pk):
+
+    pv_plant = PV_Plant.objects.get(pk=pk)
+    if request.method == 'GET':
+        context = {
+            'pv_plant': pv_plant,
+        }
+        return render(request, 'forecast.html', context)
+    else:
+        return render(request, 'forecast.html', {})
+
+
+
+@method_decorator(group_required(groups=['Owners group']), name='dispatch')
+class BusinessView(ListView):
+    template_name = 'business_client.html'
+    model = PV_Plant
+    context_object_name = 'pv_plants'
+    order_by_asc = True
+    order_by = 'name'
+    contains_text = ''
+
+
+    def dispatch(self, request, *args, **kwargs):
+        params = extract_filter_values(request.GET)
+        #self.order_by_asc = params['order'] == FilterForm.ORDER_ASC
+        self.order_by = params['order']
+        self.contains_text = params['text']
+
+
+        return super().dispatch(request, *args,**kwargs)
+
+    def get_queryset(self):
+        order_by = 'name' if self.order_by == FilterForm.ORDER_ASC else '-power'
+        result = self.model.objects.filter(name__icontains=self.contains_text).order_by(order_by)
+        return result
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #context['pv_plants'] = sorted(context['pv_plants'], key=lambda x:x.name, reverse=not self.order_by_asc)
+        context['filter_form'] = FilterForm(initial={'order': self.order_by,
+                                                     'text': self.contains_text
+                                                     })
+        return context
+
+
+class LoginView(CreateView):
+
+    template_name = 'login.html'
+    form_class = LoginForm
+    success_url = reverse_lazy('index')
+
+    #def form_valid(self, form):
+    #    valid = super().form_valid(form)
+    #    user = form.save()
+    #    login(self.request, user)
+    #    return valid
+    def post(self, request, *args, **kwargs):
+
+        login_form = LoginForm(request.POST)
+        if login_form.is_valid():
+            username = login_form.cleaned_data['username']
+            password = login_form.cleaned_data['password']
+            user = authenticate(username=username, password=password)
+            if user:
+                login(request, user)
+                return redirect('index')
+
+            return redirect('index')
+
+    def get(self, request, *args, **kwargs):
+        context = { 'login_form': LoginForm(),
+                }
+        return render(request, 'login.html', context)
+
 def login_user(request):
     if request.method == 'GET':
        context = { 'login_form': LoginForm(),
@@ -240,6 +335,10 @@ def login_user(request):
         context = {
             'login_form':login_form,
         }
+
+class Logout(LogoutView):
+    next_page = reverse_lazy('index')
+
 
 def logout_user(request):
     logout(request)

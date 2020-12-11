@@ -1,0 +1,19 @@
+{% extends "common/base/base.html" %}
+{%block site_heading %} Owned PV Plants {% endblock %}
+{% block site_content %}
+    <form method="get" action="{% url 'business_view' %}">
+        {{ filter_form }}
+        {% csrf_token %}
+        <button class="btn btn-primary">Filter</button>
+    </form>
+    <div class="d-flex p-3">
+        {% for pv_plant in pv_plants %}
+            {% if user.id == pv_plant.owner_id or user.id == 1 %}
+            {% include "partials/pv_details_owned_pp.html" with pv_plant=pv_plant %}
+            {% endif %}
+        {% endfor %}
+
+
+    </div>
+
+{% endblock %}

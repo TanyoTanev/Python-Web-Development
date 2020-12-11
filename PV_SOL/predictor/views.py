@@ -40,10 +40,16 @@ def get_n_days(request):
         graph = forecast_graph(request, beggining)
 
         context = {
-                  'graph': graph
+                  'graph': graph,
+                  'prediction_form': prediction_form
                     }
+        return render(request, 'forecast.html', context)
+ #       return render(request, 'forecast_graph.html', context)
+    else: # request.method == 'GET':
+        prediction_form = ForecastForm(request.GET)
+        return render(request, 'forecast.html', context)
 
-    return render(request, 'forecast_graph.html', context)
+
 
 def forecast_graph(request, beggining):
 
@@ -55,8 +61,8 @@ def forecast_graph(request, beggining):
     plt_period_begginig = end - beggining*288
 
     plt.figure()
-    plt.figure(figsize=(20,10))
-    plt.rcParams.update({'font.size': 12}) # must set in top
+    #plt.figure(figsize=(20,10))
+    plt.rcParams.update({'font.size': 8}) # must set in top
 
     plt.title(f"Power generation comparison between measured and predicted values")
     plt.plot(Y[plt_period_begginig:end].index, Y_predicted[plt_period_begginig:end], label = f"Predicted generation")
