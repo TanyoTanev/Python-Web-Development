@@ -7,7 +7,7 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, TemplateView, FormView, UpdateView
+from django.views.generic import ListView, CreateView, TemplateView, FormView, UpdateView, DeleteView
 
 from .decorators import group_required
 from .forms import PVCreateForm, RegisterForm, LoginForm, FilterForm, ProfileForm, ForecastForm, PVUpdateForm
@@ -114,47 +114,38 @@ def pv_plant_details(request, pk):
     return render(request, 'pv_plants_details.html',context)
 
 #@method_decorator(group_required(groups=['Owners group']), name='dispatch')
-class PVUpdateView(GroupRequiredMixin,LoginRequiredMixin, FormView): #
-    form_class = PVUpdateForm
+class PVUpdateView(GroupRequiredMixin, LoginRequiredMixin, UpdateView):
+
+    form_class = PVCreateForm
     template_name = 'pv_update.html'
-    success_url = reverse_lazy('index')
     groups = ['User']
+    model = PV_Plant
+
+    def get_success_url(self):
+        success_url = reverse_lazy('index', kwargs={})
+        return success_url
 
     def form_valid(self, form):
-        #contact = form.save(commit=False)
-        #contact.owner = request.user
-        #contact.save()
+        pv_plant = self.get_object()
 
-        form.save() # оригинално така да се каже
+        pv_plant = form.save(commit=False)
+        pv_plant.owner = self.request.user
+        pv_plant.save()
+
         return super().form_valid(form)
 
-# allowed only if the user id is creator or admin, checked in template
-def pv_plant_edit(request, pk):
-    pv_plant = PV_Plant.objects.get(pk=pk)
-    form = PVCreateForm(request.POST or None, instance=pv_plant)
-    if form.is_valid():
-        pv_plant.owner = request.user
-        form.save()
-        return redirect('index')
-    return render(request, 'pv_update.html', context={'form':form})
 
-# allowed only if the user id is creator or admin, checked in template
-def pv_plant_delete(request, pk):
-    pv_plant = PV_Plant.objects.get(pk=pk)
-    if request.method == 'GET':
-        context = {
-            'pv_plant': pv_plant,
-                   }
-        return render(request, 'delete.html', context)
-    else:
-        pv_plant.delete()
-        return redirect('index')
-
-
-class PVPlantUpdate(ListView):
-    fields = ['name']
-    template_name = 'pv_update.html'
+class PVDeleteView(LoginRequiredMixin, DeleteView):
     model = PV_Plant
+    template_name = 'delete.html'
+    success_url = reverse_lazy('index')
+
+    def dispatch(self, request, *args, **kwargs):
+        pv_plant = self.get_object()
+        if pv_plant.owner_id != request.user.id:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
 
 
 @method_decorator(group_required(groups=['Owners group']), name='dispatch')
