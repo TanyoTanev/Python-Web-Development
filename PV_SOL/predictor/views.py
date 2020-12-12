@@ -43,11 +43,11 @@ def get_n_days(request):
                   'graph': graph,
                   'prediction_form': prediction_form
                     }
-        return render(request, 'forecast.html', context)
+        return render(request, 'forecast_graph_proba.html', context)
  #       return render(request, 'forecast_graph.html', context)
     else: # request.method == 'GET':
         prediction_form = ForecastForm(request.GET)
-        return render(request, 'forecast.html', context)
+        return render(request, 'forecast_graph_proba.html', context)
 
 
 
@@ -61,7 +61,7 @@ def forecast_graph(request, beggining):
     plt_period_begginig = end - beggining*288
 
     plt.figure()
-    #plt.figure(figsize=(20,10))
+    plt.figure(figsize=(3,2))
     plt.rcParams.update({'font.size': 8}) # must set in top
 
     plt.title(f"Power generation comparison between measured and predicted values")

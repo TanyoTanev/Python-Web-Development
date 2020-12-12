@@ -6,7 +6,7 @@
 
     <form method="post" action="{% url 'forecast_graph' %}">
         {% csrf_token %}
-        {{ graph|safe }}
+        <img src="{{ graph|safe }}" class="w-50 rounded mx-auto d-block"/>
     </form>
     </div>
 

@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -14,6 +16,9 @@ from .forms import PVCreateForm, RegisterForm, LoginForm, FilterForm, ProfileFor
 from .models import PV_Plant
 from .view_mixins import GroupRequiredMixin
 
+
+def clean_up_files(path):
+    os.remove(path)
 
 def extract_filter_values(params):
     order = params['order'] if 'order' in params else FilterForm.ORDER_ASC
@@ -127,6 +132,9 @@ class PVUpdateView(GroupRequiredMixin, LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         pv_plant = self.get_object()
+        old_image = pv_plant.image
+        if old_image:
+            clean_up_files(old_image.path)
 
         pv_plant = form.save(commit=False)
         pv_plant.owner = self.request.user
