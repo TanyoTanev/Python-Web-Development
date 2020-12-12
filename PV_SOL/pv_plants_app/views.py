@@ -12,7 +12,8 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, TemplateView, FormView, UpdateView, DeleteView
 
 from .decorators import group_required
-from .forms import PVCreateForm, RegisterForm, LoginForm, FilterForm, ProfileForm, ForecastForm, PVUpdateForm
+from .forms import PVCreateForm, RegisterForm, LoginForm, FilterForm, ProfileForm, ForecastForm, PVUpdateForm, \
+    AboutUsForm
 from .models import PV_Plant
 from .view_mixins import GroupRequiredMixin
 
@@ -28,6 +29,17 @@ def extract_filter_values(params):
         'order':order,
         'text': text,
     }
+
+class AboutUsView(ListView):
+    template_name = 'about_us.html'
+    model = PV_Plant
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = AboutUsForm()
+        return context
+
+
 
 class IndexView(ListView):
     template_name = 'index.html'
@@ -118,7 +130,22 @@ def pv_plant_details(request, pk):
             }
     return render(request, 'pv_plants_details.html',context)
 
-#@method_decorator(group_required(groups=['Owners group']), name='dispatch')
+class PVDetailsView(LoginRequiredMixin, ListView):
+
+    form_class = PVCreateForm
+    template_name = 'pv_plants_details.html'
+    groups = ['User']
+    model = PV_Plant
+
+
+    def get(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        object_list = self.get_queryset()
+        pv_plant = self.objects.get()
+        context['pv_plant'] = pv_plant
+        return self.render_to_response(context)
+
+@method_decorator(group_required(groups=['Owners group']), name='dispatch')
 class PVUpdateView(GroupRequiredMixin, LoginRequiredMixin, UpdateView):
 
     form_class = PVCreateForm
@@ -181,19 +208,6 @@ class GenerationForecast(ListView):
        # id=self.request.get('id')
         #context['id']=id
         #return context
-
-def pv_plant_forecast(request, pk):
-
-    pv_plant = PV_Plant.objects.get(pk=pk)
-    if request.method == 'GET':
-        context = {
-            'pv_plant': pv_plant,
-        }
-        return render(request, 'forecast.html', context)
-    else:
-        return render(request, 'forecast.html', {})
-
-
 
 @method_decorator(group_required(groups=['Owners group']), name='dispatch')
 class BusinessView(ListView):

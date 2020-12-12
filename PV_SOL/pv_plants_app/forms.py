@@ -79,3 +79,6 @@ class ForecastForm(forms.Form):
     number_of_days = forms.IntegerField(min_value=1, max_value=17, validators=[MinValueValidator(1), MaxValueValidator(17)])
 
 
+class AboutUsForm(forms.Form):
+    class Meta:
+        model = PV_Plant

@@ -1,0 +1,59 @@
+{% extends "common/base/base.html" %}
+<h1>{%block site_heading %} About us {% endblock %}</h1>
+{% block site_content %}
+    {% load static %}
+
+
+    <head>
+    <link rel="stylesheet" href="{% static "css/about_us.css" %}">
+    </head>
+    <body>
+
+    <div class="a"> Established in 2021, PV SOL Holding is one of the leading players in the South-East Europe PV forecast-as-a-service
+    sector.
+    Out employees have been awarded with various scientific awards including the know-how of the company. The companies that entrusted us their forecasts
+    are with combined more than 30 MW installed capacity. We have gained significant experience
+    in engineering, installation, operation and maintenance of PV systems (on-grid, off-grid and hybrid).
+
+    Vision – Innovative system integrator on the decentralized market of production, storage and consumption of energy.
+    Mission – Affordable energy for all by smart innovative systems and cost-effective solutions using the power of the sun.
+    Business model – High environment and quality standards, cooperation with our clients and care for their investments.
+    </div>
+    <h1 style="text-align:center">Our Team</h1>
+    <div class="row">
+    <div class="column">
+        <div class="card">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI7VNzpql_niVOfA8PVisUrFjRo90ALNPxHw&usqp=CAU" alt="CEO" style="width:100%">
+            <div class="container">
+                <h2>Petar Ganev</h2>
+                <p class="title">CEO and founder</p>
+                <p>Some text that describes me lorem ipsum ipsum lorem.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+    <div class="column">
+        <div class="card">
+            <img src="https://image.shutterstock.com/image-photo/confident-successful-ceo-business-woman-260nw-1088049656.jpg" alt="RD" style="width:100%">
+            <div class="container">
+                <h2>Gergana Ivanova</h2>
+                <p class="title">Technical and R&D Director</p>
+                <p>Some text that describes me lorem ipsum ipsum lorem.</p>
+            </div>
+        </div>
+        </div>
+        <div class="row">
+        <div class="column">
+            <div class="card">
+                <img src="https://static7.depositphotos.com/1301499/780/i/600/depositphotos_7800131-stock-photo-business-man.jpg" alt="John" style="width:100%">
+                <div class="container">
+                    <h2>John Doe</h2>
+                    <p class="title">Designer</p>
+                    <p>Some text that describes me lorem ipsum ipsum lorem.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </body>
+{% endblock %}

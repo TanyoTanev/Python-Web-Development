@@ -1,5 +1,10 @@
 {% extends "common/base/base.html" %}
 {% block site_content %}
+    {% load static %}
+    <head>
+        <link rel="stylesheet" href="{% static "css/base.css" %}">
+    </head>
+    <body>
 
     {% load bootstrap4 %}
     <h1 class="text-center"> Register </h1>
@@ -20,4 +25,5 @@
             {% endbuttons %}
         </form>
     </div>
+    </body>
 {% endblock %}

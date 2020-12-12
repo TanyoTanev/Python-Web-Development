@@ -1,6 +1,12 @@
 {% extends 'common/base/base.html' %}
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static "css/base.css" %}">
+</head>
+<body>
 
 {% block site_content %}
     {{ pv_plant.name }}
     <img class="card-img-top" src="{{ pv_plant.image.url }}" alt="Card image cap">
 {% endblock %}
+</body>

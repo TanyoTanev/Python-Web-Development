@@ -6,15 +6,15 @@
     <title>PV SOL</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
 </head>
-<body>
+{% include "common/header.html" with current_page=current_page%}
 {% load static %}
 
-{% include "common/header.html" with current_page=current_page%}
+
 
 <h1 class="text-center">
     {% block site_heading %} {% endblock %}
 </h1>
-
+<body>
 {% block site_content %} {% endblock %}
 
 {% include "common/footer.html" %}

@@ -1,0 +1,21 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    background-image: url("/media/pv_plants/desert_solar_photovoltaic_702650719.jpg");
+    background-color: #cccccc;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+h1 {
+    text-align: center;
+    text-transform: uppercase;
+    color: #87CEFA;
+    font-family: "Serif", Garamond, serif;
+}
+
+div {
+
+    color: #87CEFA;
+
+}
