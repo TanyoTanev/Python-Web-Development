@@ -177,7 +177,7 @@ class PVDeleteView(LoginRequiredMixin, DeleteView):
 
     def dispatch(self, request, *args, **kwargs):
         pv_plant = self.get_object()
-        if pv_plant.owner_id != request.user.id:
+        if pv_plant.owner_id != request.user.id and request.user.id != request.user.is_superuser:
             return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
 

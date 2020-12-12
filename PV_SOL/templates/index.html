@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="{% static "css/base.css" %}">
     </head>
     <body>
-
+    {% load bootstrap4 %}
     <form method="get" action="{% url 'index' %}">
             {{ filter_form }}
             {% csrf_token %}

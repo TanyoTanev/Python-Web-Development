@@ -1,29 +1,13 @@
 {% extends "common/base/base.html" %}
 {% block site_content %}
-
+    {% load static %}
+    <head>
+        <link rel="stylesheet" href="{% static "css/base.css" %}">
+    </head>
+    {% load bootstrap4 %}
+    <body>
     {% load bootstrap4 %}
     <h1 class="text-center"> Forecast </h1>
-
-    <style>
-        fieldset {
-            font-size: 1em;
-            padding: 0.5em;
-            border-radius: 1em;
-            font-family: sans-serif;
-        }
-
-        label, input, button {
-            font-size: inherit;
-            padding: 0.2em;
-            margin: 0.1em 0.2em;
-            /* the following ensures they're all using the same box-model for rendering */
-            -moz-box-sizing: content-box; /* or `border-box` */
-            -webkit-box-sizing: content-box;
-            box-sizing: content-box;
-        }
-
-    </style>
-
 
     <div class="card m-3" style="width: 30rem;">
         <form method="post" action="{% url 'forecast_graph' %}" class="col-lg-6 offset-lg-3" enctype="multipart/form-data">
@@ -44,4 +28,5 @@
         </form>
     </div>
     </div>
+    </body>
 {% endblock %}
